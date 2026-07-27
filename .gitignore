@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+.env
+
+# Model Files
+*.h5
+*.keras
+*.pt
+
+# VS Code
+.vscode/
+
+# Dataset
+dataset/**/*.tmp
+
+# Operating System
+.DS_Store
+Thumbs.db
