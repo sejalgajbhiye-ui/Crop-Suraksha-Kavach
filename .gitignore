@@ -1,22 +1,24 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 
 # Virtual Environment
 venv/
 .env
 
-# Model Files
-*.h5
-*.keras
+# YOLO Models
 *.pt
+
+# Training Output
+runs/
 
 # VS Code
 .vscode/
 
-# Dataset
-dataset/**/*.tmp
-
-# Operating System
+# OS Files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
