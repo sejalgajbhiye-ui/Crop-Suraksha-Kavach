@@ -1,24 +1,21 @@
 # Python
+venv/
 __pycache__/
 *.pyc
-*.pyo
-
-# Virtual Environment
-venv/
-.env
-
-# YOLO Models
-*.pt
-
-# Training Output
-runs/
 
 # VS Code
 .vscode/
 
-# OS Files
+# Dataset
+dataset/yolo_dataset/
+dataset/open_images/
+
+# FiftyOne
+fiftyone/
+
+# Model weights
+*.pt
+
+# OS files
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log

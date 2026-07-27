@@ -1,13 +1,11 @@
 import fiftyone.zoo as foz
 
-classes = ["Cow", "Deer", "Elephant"]
-
 dataset = foz.load_zoo_dataset(
     "open-images-v7",
     split="train",
     label_types=["detections"],
-    classes=classes,
-    max_samples=1500,
+    classes=["Deer", "Elephant"],
+    max_samples=2000,
 )
 
-print("Dataset downloaded successfully!")
+print("Download completed!")
