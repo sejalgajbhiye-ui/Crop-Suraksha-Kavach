@@ -3,18 +3,19 @@ venv/
 __pycache__/
 *.pyc
 
+# YOLO training
+runs/
+
+# Dataset images
+dataset/train/
+dataset/valid/
+dataset/test/
+
+# Logs
+*.log
+
 # VS Code
 .vscode/
-
-# Dataset
-dataset/yolo_dataset/
-dataset/open_images/
-
-# FiftyOne
-fiftyone/
-
-# Model weights
-*.pt
 
 # OS files
 .DS_Store

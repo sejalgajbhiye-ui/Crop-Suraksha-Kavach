@@ -1,7 +1,13 @@
 import fiftyone.zoo as foz
-from fiftyone.types import YOLOv5Dataset
+import fiftyone.types as fot
+import os
+import shutil
 
-# Load the dataset
+# Remove old export if it exists
+if os.path.exists("dataset/yolo_dataset"):
+    shutil.rmtree("dataset/yolo_dataset")
+
+# Load dataset
 dataset = foz.load_zoo_dataset(
     "open-images-v7",
     split="train",
@@ -10,11 +16,13 @@ dataset = foz.load_zoo_dataset(
     max_samples=3000,
 )
 
-# Export in YOLO format
+print("Dataset loaded!")
+
+# Export
 dataset.export(
     export_dir="dataset/yolo_dataset",
-    dataset_type=YOLOv5Dataset,
-    label_field="ground_truth",   # <-- Changed from detections
+    dataset_type=fot.YOLOv5Dataset,
+    label_field="ground_truth",
 )
 
 print("YOLO dataset exported successfully!")
