@@ -1,25 +1,45 @@
+# =========================
 # Python
+# =========================
 venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# YOLO training
+# =========================
+# YOLO training outputs
+# =========================
 runs/
 
-# Dataset images
+# =========================
+# Large dataset files
+# =========================
 dataset/train/
 dataset/valid/
 dataset/test/
 
-# Test images
-test_images/
+# Dataset caches
+*.cache
 
+# =========================
+# Backend temporary files
+# =========================
+backend/uploads/
+backend/results/
+
+# =========================
 # Logs
+# =========================
 *.log
 
+# =========================
 # VS Code
+# =========================
 .vscode/
 
+# =========================
 # OS files
+# =========================
 .DS_Store
 Thumbs.db
