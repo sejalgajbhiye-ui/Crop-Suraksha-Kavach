@@ -11,6 +11,9 @@ dataset/train/
 dataset/valid/
 dataset/test/
 
+# Test images
+test_images/
+
 # Logs
 *.log
 
