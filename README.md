@@ -101,6 +101,59 @@ Notify Farmer
 - OpenCV
 - NumPy
 
+## 🤖 Machine Learning
+
+The project uses YOLOv8n for animal detection.
+
+### Dataset
+
+The dataset was prepared using FiftyOne and Open Images.
+
+Classes:
+
+- Cow
+- Deer
+- Elephant
+
+Total images: 3000
+
+Dataset split:
+
+| Split | Images |
+|---|---:|
+| Train | 2100 |
+| Validation | 600 |
+| Test | 300 |
+
+### Training
+
+The YOLOv8n model was trained using the prepared YOLO dataset.
+
+### Model
+
+The trained model is stored at:
+
+ml_model/weights/best.pt
+
+### Detection
+
+The model returns:
+
+- Animal class
+- Confidence score
+- Bounding box
+
+### Test Results
+
+The model was evaluated on 300 test images.
+
+Overall:
+
+- Precision: 0.845
+- Recall: 0.671
+- mAP@50: 0.776
+- mAP@50-95: 0.526
+
 ### Backend
 
 - Flask
