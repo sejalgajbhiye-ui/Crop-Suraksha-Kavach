@@ -107,6 +107,39 @@ Validation	600	20%
 Testing	300	10%
 Total	3000	100%
 
+## Model Training
+
+| Parameter | Value |
+|---|---|
+| Model | YOLOv8n |
+| Total Images | 3000 |
+| Training Images | 2100 |
+| Validation Images | 600 |
+| Testing Images | 300 |
+| Epochs | 50 |
+| Image Size | 640 × 640 |
+| Batch Size | 8 |
+| Device | CPU |
+
+## Model Evaluation
+
+The trained `best.pt` model was evaluated on the separate 300-image test dataset.
+
+| Metric | Score |
+|---|---:|
+| Precision | 0.845 |
+| Recall | 0.671 |
+| mAP@50 | 0.776 |
+| mAP@50-95 | 0.526 |
+
+### Class-wise mAP@50
+
+| Class | mAP@50 |
+|---|---:|
+| Cow | 0.689 |
+| Deer | 0.787 |
+| Elephant | 0.853 |
+
 The dataset follows the YOLO directory structure:
 
 dataset/
