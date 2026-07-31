@@ -1,13 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from ultralytics import YOLO
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 # Load trained YOLO model
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 MODEL_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "..",
+    BASE_DIR,
     "ml_model",
     "weights",
     "best.pt"
@@ -114,10 +117,7 @@ def detect():
         }), 400
 
     # Temporary upload directory
-    upload_dir = os.path.join(
-        os.path.dirname(__file__),
-        "uploads"
-    )
+    upload_dir = "/tmp/uploads"
 
     os.makedirs(upload_dir, exist_ok=True)
 
