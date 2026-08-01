@@ -109,6 +109,10 @@ Total	3000	100%
 
 ## Model Training
 
+Command:
+
+yolo detect train data=dataset/data.yaml model=yolov8n.pt epochs=50 imgsz=640 batch=8 device=cpu
+
 | Parameter | Value |
 |---|---|
 | Model | YOLOv8n |
@@ -125,11 +129,11 @@ Total	3000	100%
 
 The trained `best.pt` model was evaluated on the separate 300-image test dataset.
 
-| Metric | Score |
-|---|---:|
+| Metric    | Score |
+|-----------|-------|
 | Precision | 0.845 |
-| Recall | 0.671 |
-| mAP@50 | 0.776 |
+| Recall    | 0.671 |
+| mAP@50    | 0.776 |
 | mAP@50-95 | 0.526 |
 
 ### Class-wise mAP@50
