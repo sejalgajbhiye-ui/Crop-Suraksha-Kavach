@@ -66,35 +66,31 @@ The following diagram illustrates the end-to-end dataflow and communication betw
 
 ```mermaid
 flowchart TD
-    subgraph Edge_Hardware ["📡 Edge Acquisition Layer (ESP32-CAM)"]
-        PIR["PIR Motion Sensor"] -->|Motion Detected| MCU["ESP32 Microcontroller"]
-        MCU -->|Trigger Capture| CAM["OV2640 Camera Module"]
-        CAM -->|JPEG Frame Buffer| HTTP_CLIENT["HTTP Client (Multipart POST)"]
+    subgraph Edge_Hardware [Edge Acquisition Layer - ESP32-CAM]
+        PIR[PIR Motion Sensor] -->|Motion Detected| MCU[ESP32 Microcontroller]
+        MCU -->|Trigger Capture| CAM[OV2640 Camera Module]
+        CAM -->|JPEG Frame Buffer| HTTP_CLIENT[HTTP Client - Multipart POST]
     end
 
-    subgraph Backend_Engine ["⚙️ Intelligence Layer (Flask Backend)"]
-        HTTP_CLIENT -->|POST /detect (Multipart)| API["Flask REST Controller"]
-        WEB_CAM["Webcam Browser Stream"] -->|1 FPS Frame Polling| API
-        API --> PRE["Image Validation & Preprocessing"]
-        PRE --> YOLO_ENGINE["YOLOv8n Neural Engine (best.pt)"]
-        YOLO_ENGINE --> NMS["Non-Maximum Suppression & Box Decoding"]
-        NMS --> DETECT_OUT["Detections: Class, Conf, Bounding Box"]
-        DETECT_OUT --> THREAT_ENGINE["Threat Assessment & Alert Engine"]
+    subgraph Backend_Engine [Intelligence Layer - Flask Backend]
+        HTTP_CLIENT -->|POST /detect multipart| API[Flask REST Controller]
+        WEB_CAM[Webcam Browser Stream] -->|1 FPS Frame Polling| API
+        API --> PRE[Image Validation & Preprocessing]
+        PRE --> YOLO_ENGINE[YOLOv8n Neural Engine - best.pt]
+        YOLO_ENGINE --> NMS[Non-Maximum Suppression & Box Decoding]
+        NMS --> DETECT_OUT[Detections: Class, Conf, Bounding Box]
+        DETECT_OUT --> THREAT_ENGINE[Threat Assessment & Alert Engine]
     end
 
-    subgraph Defense_And_UI ["🔔 Alert & Monitoring Layer"]
-        THREAT_ENGINE -->|JSON Payload| UI["Web Monitoring Dashboard"]
+    subgraph Defense_And_UI [Alert & Monitoring Layer]
+        THREAT_ENGINE -->|JSON Payload| UI[Web Monitoring Dashboard]
         THREAT_ENGINE -->|Feedback Response| MCU
-        MCU --> BUZZER["🚨 High-Decibel Buzzer"]
-        MCU --> FLASH_LED["💡 High-Intensity Flash LED"]
-        MCU --> GSM["📱 GSM SMS / Call Notification"]
-        UI --> CANVAS["Live Canvas Bounding Box Overlay"]
-        UI --> STAT_CARD["Threat Status & Severity Badge"]
+        MCU --> BUZZER[High-Decibel Buzzer]
+        MCU --> FLASH_LED[High-Intensity Flash LED]
+        MCU --> GSM[GSM SMS / Call Notification]
+        UI --> CANVAS[Live Canvas Bounding Box Overlay]
+        UI --> STAT_CARD[Threat Status & Severity Badge]
     end
-
-    style Edge_Hardware fill:#f0f9ff,stroke:#0284c7,stroke-width:2px;
-    style Backend_Engine fill:#fefce8,stroke:#ca8a04,stroke-width:2px;
-    style Defense_And_UI fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
 ```
 
 ---
@@ -107,45 +103,42 @@ The core detection engine is powered by **YOLOv8n (Nano)**, designed for optimal
 
 ```mermaid
 flowchart LR
-    subgraph INPUT ["Input"]
-        IMG["Input Frame\n(640 × 640 × 3)"]
+    subgraph INPUT [Input Layer]
+        IMG[Input Frame<br/>640 x 640 x 3]
     end
 
-    subgraph BACKBONE ["Backbone (Modified CSPDarknet)"]
-        C1["Conv P1/2"] --> C2["Conv P2/4"]
-        C2 --> C2F1["C2f Module"]
-        C2F1 --> C3["Conv P3/8"]
-        C3 --> C2F2["C2f Module (P3)"]
-        C2F2 --> C4["Conv P4/16"]
-        C4 --> C2F3["C2f Module (P4)"]
-        C2F3 --> C5["Conv P5/32"]
-        C5 --> SPPF["SPPF (Spatial Pyramid Pooling)"]
+    subgraph BACKBONE [Backbone - Modified CSPDarknet]
+        C1[Conv P1/2] --> C2[Conv P2/4]
+        C2 --> C2F1[C2f Module]
+        C2F1 --> C3[Conv P3/8]
+        C3 --> C2F2[C2f Module P3]
+        C2F2 --> C4[Conv P4/16]
+        C4 --> C2F3[C2f Module P4]
+        C2F3 --> C5[Conv P5/32]
+        C5 --> SPPF[SPPF Spatial Pyramid Pooling]
     end
 
-    subgraph NECK ["Neck (PANet / Feature Pyramid)"]
-        SPPF --> UPSAMPLE1["Upsample 2x"]
-        UPSAMPLE1 --> CONCAT1["Concat + C2f"]
-        CONCAT1 --> UPSAMPLE2["Upsample 2x"]
-        UPSAMPLE2 --> CONCAT2["Concat + C2f (Scale 80x80)"]
-        CONCAT2 --> DOWN1["Downsample Conv"]
-        DOWN1 --> CONCAT3["Concat + C2f (Scale 40x40)"]
-        CONCAT3 --> DOWN2["Downsample Conv"]
-        DOWN2 --> CONCAT4["Concat + C2f (Scale 20x20)"]
+    subgraph NECK [Neck - PANet Feature Pyramid]
+        SPPF --> UPSAMPLE1[Upsample 2x]
+        UPSAMPLE1 --> CONCAT1[Concat & C2f]
+        CONCAT1 --> UPSAMPLE2[Upsample 2x]
+        UPSAMPLE2 --> CONCAT2[Concat & C2f - Scale 80x80]
+        CONCAT2 --> DOWN1[Downsample Conv]
+        DOWN1 --> CONCAT3[Concat & C2f - Scale 40x40]
+        CONCAT3 --> DOWN2[Downsample Conv]
+        DOWN2 --> CONCAT4[Concat & C2f - Scale 20x20]
     end
 
-    subgraph HEAD ["Decoupled Head (Anchor-Free)"]
-        CONCAT2 --> H1["Cls Loss (BCE) + Reg Loss (CIoU/DFL)"]
-        CONCAT3 --> H2["Cls Loss (BCE) + Reg Loss (CIoU/DFL)"]
-        CONCAT4 --> H3["Cls Loss (BCE) + Reg Loss (CIoU/DFL)"]
+    subgraph HEAD [Decoupled Head - Anchor-Free]
+        CONCAT2 --> H1[Cls Loss BCE + Reg Loss CIoU/DFL]
+        CONCAT3 --> H2[Cls Loss BCE + Reg Loss CIoU/DFL]
+        CONCAT4 --> H3[Cls Loss BCE + Reg Loss CIoU/DFL]
     end
 
     IMG --> C1
-    H1 & H2 & H3 --> OUTPUT["Decoded Bounding Boxes\nClass Scores (Cow, Deer, Elephant)"]
-
-    style INPUT fill:#eff6ff,stroke:#3b82f6,stroke-width:1px;
-    style BACKBONE fill:#fdf4ff,stroke:#c026d3,stroke-width:1px;
-    style NECK fill:#fff7ed,stroke:#ea580c,stroke-width:1px;
-    style HEAD fill:#f0fdfa,stroke:#0d9488,stroke-width:1px;
+    H1 --> OUTPUT[Decoded Bounding Boxes<br/>Class Scores: Cow, Deer, Elephant]
+    H2 --> OUTPUT
+    H3 --> OUTPUT
 ```
 
 #### Key Architecture Highlights:
@@ -161,14 +154,14 @@ The dataset was curated and converted using **FiftyOne** and the **Open Images v
 
 ```mermaid
 flowchart TD
-    OIV7["Open Images v7 (Zoo Dataset)"] --> FO["FiftyOne Query & Filter"]
-    FO -->|"Select 'Cattle', 'Deer', 'Elephant'"| SAMPLES["3,000 Curated Images"]
-    SAMPLES --> MAP["Label Remapping: Cattle ➔ Cow"]
-    MAP --> YOLO_CONV["Bounding Box Normalization (x_center, y_center, w, h)"]
-    YOLO_CONV --> SPLIT["Stratified Dataset Split (70 / 20 / 10)"]
-    SPLIT --> D_TRAIN["Train: 2,100 Images (70%)"]
-    SPLIT --> D_VAL["Validation: 600 Images (20%)"]
-    SPLIT --> D_TEST["Test: 300 Images (10%)"]
+    OIV7[Open Images v7 Dataset] --> FO[FiftyOne Query & Filter]
+    FO -->|Select Cattle, Deer, Elephant| SAMPLES[3,000 Curated Images]
+    SAMPLES --> MAP[Label Remapping: Cattle to Cow]
+    MAP --> YOLO_CONV[Bounding Box Normalization: x_center, y_center, w, h]
+    YOLO_CONV --> SPLIT[Stratified Dataset Split: 70 / 20 / 10]
+    SPLIT --> D_TRAIN[Train: 2,100 Images - 70%]
+    SPLIT --> D_VAL[Validation: 600 Images - 20%]
+    SPLIT --> D_TEST[Test: 300 Images - 10%]
 ```
 
 | Subset | Sample Count | Ratio | Purpose |
