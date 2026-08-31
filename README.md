@@ -176,6 +176,7 @@ flowchart TD
 ### Training & Hyperparameters
 
 ```bash
+# YOLOv8n Training Command
 yolo detect train data=dataset/data.yaml model=yolov8n.pt epochs=50 imgsz=640 batch=8 device=cpu
 ```
 
@@ -185,21 +186,27 @@ yolo detect train data=dataset/data.yaml model=yolov8n.pt epochs=50 imgsz=640 ba
 | **Epochs** | 50 | **Learning Rate** | $0.01$ (with cosine decay) |
 | **Image Resolution** | $640 \times 640$ | **Batch Size** | 8 |
 | **Loss Functions** | CIoU + DFL + BCE | **Target Classes** | 3 (Cow, Deer, Elephant) |
+| **Device** | CPU / CUDA | **Saved Weights** | `ml_model/weights/best.pt` |
 
 ---
 
 ### Model Evaluation & Benchmarks
 
-The trained `best.pt` model was evaluated on the independent 300-image test split:
+To evaluate the trained model on the unseen test partition:
+
+```bash
+# Model Validation on Test Split
+yolo detect val model="ml_model/weights/best.pt" data=dataset/data.yaml split=test imgsz=640 device=cpu
+```
 
 <div align="center">
 
-| Metric | Overall Score |
-|---|---|
-| 🎯 **Precision** | **0.845 (84.5%)** |
-| 🔍 **Recall** | **0.671 (67.1%)** |
-| 📈 **mAP@50** | **0.776 (77.6%)** |
-| 📊 **mAP@50-95** | **0.526 (52.6%)** |
+| Metric | Overall Score | Description |
+|---|---|---|
+| 🎯 **Precision** | **0.845 (84.5%)** | Ratio of true positive animal detections |
+| 🔍 **Recall** | **0.671 (67.1%)** | Ratio of actual animals successfully localized |
+| 📈 **mAP@50** | **0.776 (77.6%)** | Mean Average Precision at IoU threshold of 0.50 |
+| 📊 **mAP@50-95** | **0.526 (52.6%)** | Mean Average Precision across IoU thresholds 0.50 to 0.95 |
 
 </div>
 
@@ -210,6 +217,32 @@ Elephant  ███████████████████████�
 Deer      ███████████████████████████████▍     78.7%
 Cow       ███████████████████████████▌         68.9%
 ```
+
+---
+
+### Direct Inference & Sample Image Testing
+
+Run direct predictions using the YOLO CLI:
+
+```bash
+# Inference on test images
+yolo detect predict model="ml_model/weights/best.pt" source=test_images imgsz=640 conf=0.5 save=True
+```
+
+#### Sample Image Benchmark Results:
+- 🐮 **`test_images/cow.jpg`**: `1 cow detected` (Confidence: **95.5%**) ➔ Severity: `LOW`
+- 🦌 **`test_images/deer.jpg`**: `1 deer detected` (Confidence: **89.5%**) ➔ Severity: `MEDIUM`
+- 🐘 **`test_images/elephant.jpg`**: `1 elephant detected` (Confidence: **92.4%**) ➔ Severity: `HIGH`
+
+---
+
+### 🔬 Summary of ML Contributions
+
+1. **Curated Wildlife Dataset**: Downloaded and filtered 3,000 images from Google Open Images v7 using FiftyOne.
+2. **Annotation Pipeline**: Converted bounding boxes to normalized YOLO format (`class_id x_center y_center width height`).
+3. **Stratified Splitting**: Built balanced training (70%), validation (20%), and test (10%) splits.
+4. **End-to-End Transfer Learning**: Fine-tuned YOLOv8n network weights with automated convergence on agricultural wildlife.
+5. **REST API & Edge Integration**: Packaged `best.pt` with a lightweight, multi-threaded inference and alert pipeline.
 
 ---
 
@@ -339,48 +372,97 @@ Crop-Suraksha-Kavach/
 
 ---
 
-## 🚀 Installation & Getting Started
+## 💻 Step-by-Step Guide: Running in Visual Studio Code (VS Code)
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/sejalgajbhiye-ui/Crop-Suraksha-Kavach.git
-cd Crop-Suraksha-Kavach
-```
+Follow these steps to run and test the complete system directly inside **VS Code**:
 
-### 2. Setup Virtual Environment & Dependencies
-```bash
-# Create and activate virtual environment
+### Step 1: Open the Project in VS Code
+1. Launch **Visual Studio Code**.
+2. Click **File ➔ Open Folder...** (or press `Ctrl + K, Ctrl + O`).
+3. Select the `Crop_Suraksha_Kavach` directory.
+
+### Step 2: Open Integrated Terminal
+- Press `` Ctrl + ` `` (Backtick) or go to **Terminal ➔ New Terminal**.
+
+### Step 3: Create & Activate Virtual Environment
+In the VS Code terminal, run:
+
+```powershell
+# Create virtual environment
 python -m venv venv
 
-# Windows:
+# Activate on Windows:
 venv\Scripts\activate
-# Linux/macOS:
-# source venv/bin/activate
 
-# Install requirements
+# Activate on Linux/macOS:
+# source venv/bin/activate
+```
+
+### Step 4: Install Dependencies
+```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Start the Backend API Server
-```bash
+### Step 5: Start the Flask Backend Server
+In your active VS Code terminal, run:
+
+```powershell
 python backend/app.py
 ```
-Server runs on `http://127.0.0.1:5000`.
 
-### 4. Launch Frontend Monitoring Dashboard
-- Open [`frontend/index.html`](file:///d:/Interview%20Preparation%20Material/TOP_PROJECTS/Crop_Suraksha_Kavach/frontend/index.html) in your web browser, **or**
-- Serve via Python:
-```bash
+> **You will see:**
+> ```text
+>  * Running on http://127.0.0.1:5000
+>  * Debugger is active!
+> ```
+
+Keep this terminal open and running.
+
+### Step 6: Launch the Frontend Web Dashboard
+
+Choose either method below:
+
+#### Method A: Using VS Code Live Server Extension (Recommended)
+1. Install the **Live Server** extension by *Ritwick Dey* from the Extensions tab (`Ctrl + Shift + X`).
+2. In the Explorer sidebar, navigate to `frontend/index.html`.
+3. **Right-click** on [`frontend/index.html`](file:///d:/Interview%20Preparation%20Material/TOP_PROJECTS/Crop_Suraksha_Kavach/frontend/index.html) and select **Open with Live Server**.
+4. The web dashboard will automatically open in your default browser at `http://127.0.0.1:5500/frontend/index.html`.
+
+#### Method B: Using Built-in Python Server
+1. Click the `+` icon in the terminal window to open a **Second Terminal**.
+2. Run:
+```powershell
 python -m http.server 8000 --directory frontend
 ```
-Then visit `http://localhost:8000`.
+3. Open your browser and navigate to `http://localhost:8000`.
+
+### Step 7: Perform Live Monitoring
+1. Click the **▶ START** button on the web page.
+2. Grant camera permissions when prompted by your browser.
+3. The dashboard streams your webcam, detects animals, renders red bounding boxes with confidence scores, and updates the threat alert status in real time.
+4. Click **⏹ STOP** at any time to pause monitoring.
+
+### Step 8: Test Detection API from VS Code Terminal (Optional)
+Open a new terminal tab and test with a sample image:
+
+```powershell
+curl.exe -X POST "http://127.0.0.1:5000/detect" -F "image=@test_images/elephant.jpg"
+```
+
+---
+
+## ⚠️ Limitations
+
+- **Target Animal Scope**: Currently trained on 3 key species (Cow, Deer, Elephant); expanding to wild boars, monkeys, and nilgai in future iterations.
+- **Hardware Resources**: CPU inference takes ~150-250ms per frame. For sub-30ms real-time high FPS, a dedicated edge TPU or GPU (e.g. Jetson Nano) is recommended.
+- **Environmental Occlusion**: Dense foliage, heavy rain, or complete darkness without IR illumination may impact detection accuracy.
 
 ---
 
 ## 🔮 Roadmap & Future Scope
 
-- [x] YOLOv8n model training on Cow, Deer, Elephant.
-- [x] Flask REST API with cross-platform upload handlers.
+- [x] Custom YOLOv8n model trained on Cow, Deer, and Elephant.
+- [x] Modularized Flask REST API with cross-platform upload handlers.
 - [x] Real-time browser surveillance dashboard with multi-box canvas rendering.
 - [x] ESP32-CAM firmware with PIR motion sensor integration.
 - [ ] Edge TensorRT / ONNX runtime conversion for sub-50ms inference.
@@ -397,4 +479,5 @@ This project is open-source under the **MIT License**. See [`LICENSE`](LICENSE) 
 Special thanks to:
 - **Ultralytics** for the [YOLOv8 framework](https://github.com/ultralytics/ultralytics).
 - **Google Open Images v7** and **FiftyOne** for dataset tooling.
-- The open-source computer vision and IoT communities.
+- The open-source computer vision and agricultural IoT communities.
+
