@@ -27,11 +27,17 @@
   - [Dataset & Annotation Engineering](#dataset--annotation-engineering)
   - [Training & Hyperparameters](#training--hyperparameters)
   - [Model Evaluation & Benchmarks](#model-evaluation--benchmarks)
+  - [Direct Inference & Sample Image Testing](#direct-inference--sample-image-testing)
+  - [Summary of ML Contributions](#-summary-of-ml-contributions)
 - [Alert & Defense Mechanism](#-alert--defense-mechanism)
 - [Hardware & IoT Integration](#-hardware--iot-integration)
 - [Project Directory Structure](#-project-directory-structure)
 - [API Reference](#-api-reference)
-- [Installation & Getting Started](#-installation--getting-started)
+- [🚀 How to Run the Project (Step-by-Step)](#-how-to-run-the-project-step-by-step)
+  - [Option A: Running in Visual Studio Code (VS Code)](#option-a-running-in-visual-studio-code-vs-code)
+  - [Option B: Running via Terminal / Command Line](#option-b-running-via-terminal--command-line)
+  - [Option C: Quick Test with Sample Images (No Camera Required)](#option-c-quick-test-with-sample-images-no-camera-required)
+- [Limitations](#-limitations)
 - [Roadmap & Future Scope](#-roadmap--future-scope)
 - [License & Acknowledgments](#-license--acknowledgments)
 
@@ -372,81 +378,118 @@ Crop-Suraksha-Kavach/
 
 ---
 
-## 💻 Step-by-Step Guide: Running in Visual Studio Code (VS Code)
+## 🚀 How to Run the Project (Step-by-Step)
 
-Follow these steps to run and test the complete system directly inside **VS Code**:
+### Option A: Running in Visual Studio Code (VS Code)
 
-### Step 1: Open the Project in VS Code
-1. Launch **Visual Studio Code**.
-2. Click **File ➔ Open Folder...** (or press `Ctrl + K, Ctrl + O`).
-3. Select the `Crop_Suraksha_Kavach` directory.
+#### 1. Open Project in VS Code
+- Launch **Visual Studio Code**.
+- Go to **File ➔ Open Folder...** (or press `Ctrl + K, Ctrl + O`) and select the `Crop_Suraksha_Kavach` folder.
 
-### Step 2: Open Integrated Terminal
-- Press `` Ctrl + ` `` (Backtick) or go to **Terminal ➔ New Terminal**.
+#### 2. Open Integrated Terminal
+- Press **`` Ctrl + ` ``** (Backtick) or go to **Terminal ➔ New Terminal**.
 
-### Step 3: Create & Activate Virtual Environment
+#### 3. Setup Virtual Environment & Install Dependencies
 In the VS Code terminal, run:
 
 ```powershell
 # Create virtual environment
 python -m venv venv
 
-# Activate on Windows:
+# Activate virtual environment (Windows PowerShell)
 venv\Scripts\activate
 
-# Activate on Linux/macOS:
-# source venv/bin/activate
-```
-
-### Step 4: Install Dependencies
-```powershell
+# Install all dependencies
 pip install -r requirements.txt
 ```
 
-### Step 5: Start the Flask Backend Server
-In your active VS Code terminal, run:
+#### 4. Start the Flask Backend Server
+In your VS Code terminal:
 
 ```powershell
 python backend/app.py
 ```
 
-> **You will see:**
+> **Expected Output:**
 > ```text
 >  * Running on http://127.0.0.1:5000
 >  * Debugger is active!
 > ```
+*Keep this terminal running.*
 
-Keep this terminal open and running.
+#### 5. Launch the Frontend Web Dashboard
+Choose either method:
+- **Using VS Code Live Server Extension (Recommended)**:
+  1. Install the **Live Server** extension by *Ritwick Dey* from the Extensions tab (`Ctrl + Shift + X`).
+  2. Right-click on [`frontend/index.html`](file:///d:/Interview%20Preparation%20Material/TOP_PROJECTS/Crop_Suraksha_Kavach/frontend/index.html) in the file explorer and select **Open with Live Server**.
+- **Using Built-in Python Server**:
+  1. Open a **Second Terminal tab** by clicking the `+` button in VS Code.
+  2. Run:
+     ```powershell
+     python -m http.server 8000 --directory frontend
+     ```
+  3. Open your browser and visit `http://localhost:8000`.
 
-### Step 6: Launch the Frontend Web Dashboard
-
-Choose either method below:
-
-#### Method A: Using VS Code Live Server Extension (Recommended)
-1. Install the **Live Server** extension by *Ritwick Dey* from the Extensions tab (`Ctrl + Shift + X`).
-2. In the Explorer sidebar, navigate to `frontend/index.html`.
-3. **Right-click** on [`frontend/index.html`](file:///d:/Interview%20Preparation%20Material/TOP_PROJECTS/Crop_Suraksha_Kavach/frontend/index.html) and select **Open with Live Server**.
-4. The web dashboard will automatically open in your default browser at `http://127.0.0.1:5500/frontend/index.html`.
-
-#### Method B: Using Built-in Python Server
-1. Click the `+` icon in the terminal window to open a **Second Terminal**.
-2. Run:
-```powershell
-python -m http.server 8000 --directory frontend
-```
-3. Open your browser and navigate to `http://localhost:8000`.
-
-### Step 7: Perform Live Monitoring
+#### 6. Start Live Monitoring
 1. Click the **▶ START** button on the web page.
-2. Grant camera permissions when prompted by your browser.
-3. The dashboard streams your webcam, detects animals, renders red bounding boxes with confidence scores, and updates the threat alert status in real time.
+2. Allow camera access when prompted.
+3. The AI model performs real-time detection, draws bounding boxes, and shows alert levels.
 4. Click **⏹ STOP** at any time to pause monitoring.
 
-### Step 8: Test Detection API from VS Code Terminal (Optional)
-Open a new terminal tab and test with a sample image:
+---
+
+### Option B: Running via Terminal / Command Line
+
+#### 1. Clone & Navigate to Project
+```bash
+git clone https://github.com/sejalgajbhiye-ui/Crop-Suraksha-Kavach.git
+cd Crop-Suraksha-Kavach
+```
+
+#### 2. Create & Activate Virtual Environment
+```bash
+# Windows:
+python -m venv venv
+venv\Scripts\activate
+
+# Linux / macOS:
+# python3 -m venv venv
+# source venv/bin/activate
+```
+
+#### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Run Backend Server
+```bash
+python backend/app.py
+```
+
+#### 5. Open Frontend
+- Open [`frontend/index.html`](file:///d:/Interview%20Preparation%20Material/TOP_PROJECTS/Crop_Suraksha_Kavach/frontend/index.html) directly in any web browser, **or**
+- Run a local server in a separate terminal:
+  ```bash
+  python -m http.server 8000 --directory frontend
+  ```
+  and navigate to `http://localhost:8000`.
+
+---
+
+### Option C: Quick Test with Sample Images (No Camera Required)
+
+You can test the detection API on sample images directly from PowerShell or Terminal without a webcam:
 
 ```powershell
+# Test detection on sample elephant image
 curl.exe -X POST "http://127.0.0.1:5000/detect" -F "image=@test_images/elephant.jpg"
+
+# Test detection on sample deer image
+curl.exe -X POST "http://127.0.0.1:5000/detect" -F "image=@test_images/deer.jpg"
+
+# Test detection on sample cow image
+curl.exe -X POST "http://127.0.0.1:5000/detect" -F "image=@test_images/cow.jpg"
 ```
 
 ---
