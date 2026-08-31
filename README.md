@@ -25,7 +25,7 @@
 - [Machine Learning Architecture](#-machine-learning-architecture)
   - [Model Network & Pipeline](#model-network--pipeline)
   - [Dataset & Annotation Engineering](#dataset--annotation-engineering)
-  - [Training & Hyperparameters](#training--hyperparameters)
+  - [Model Training](#-model-training)
   - [Model Evaluation & Benchmarks](#model-evaluation--benchmarks)
   - [Direct Inference & Sample Image Testing](#direct-inference--sample-image-testing)
   - [Summary of ML Contributions](#-summary-of-ml-contributions)
@@ -179,12 +179,21 @@ flowchart TD
 
 ---
 
-### Training & Hyperparameters
+### 🏋️ Model Training
+
+The YOLOv8n object detection model was trained using the Ultralytics framework with the following command:
 
 ```bash
-# YOLOv8n Training Command
 yolo detect train data=dataset/data.yaml model=yolov8n.pt epochs=50 imgsz=640 batch=8 device=cpu
 ```
+
+#### Training Parameter Breakdown:
+- `data=dataset/data.yaml`: Dataset configuration containing paths to train/validation sets and 3 class definitions.
+- `model=yolov8n.pt`: Pretrained base YOLOv8 Nano weights for transfer learning.
+- `epochs=50`: Number of complete passes through the 2,100 training images.
+- `imgsz=640`: Input frame resolution resized to $640 \times 640$ pixels.
+- `batch=8`: Batch size of 8 images per training iteration.
+- `device=cpu`: Training executed on CPU (use `device=0` for NVIDIA GPU).
 
 | Parameter | Configuration | Parameter | Configuration |
 |---|---|---|---|
