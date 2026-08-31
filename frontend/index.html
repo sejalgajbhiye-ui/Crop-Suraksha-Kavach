@@ -1,240 +1,113 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-```
-<title>Crop Suraksha Kavach</title>
-
-<link rel="stylesheet" href="style.css">
-```
-
+    <title>Crop Suraksha Kavach</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-```
 <!-- Header -->
 <header class="header">
-
     <div class="logo">
         🌾
     </div>
-
     <div>
         <h1>Crop Suraksha Kavach</h1>
         <p>Smart Animal Detection System</p>
     </div>
-
 </header>
-
 
 <!-- Main Content -->
 <main class="container">
 
-
     <!-- Camera Section -->
     <section class="camera-section">
-
         <div class="section-title">
-
             <h2>Live Monitoring</h2>
-
-            <span
-                id="connectionStatus"
-                class="status offline">
-
+            <span id="connectionStatus" class="status offline">
                 ● Offline
-
             </span>
-
         </div>
-
 
         <!-- Camera -->
         <div class="camera-container">
-
-            <video
-                id="camera"
-                autoplay
-                playsinline>
-            </video>
-
-
-            <canvas
-                id="detectionCanvas">
-            </canvas>
-
+            <video id="camera" autoplay playsinline></video>
+            <canvas id="detectionCanvas"></canvas>
 
             <!-- Camera Placeholder -->
-            <div
-                id="cameraPlaceholder"
-                class="camera-placeholder">
-
+            <div id="cameraPlaceholder" class="camera-placeholder">
                 <div class="camera-icon">
                     📷
                 </div>
-
-                <h3>
-                    Camera is not active
-                </h3>
-
-                <p>
-                    Click START to begin live monitoring
-                </p>
-
+                <h3>Camera is not active</h3>
+                <p>Click START to begin live monitoring</p>
             </div>
-
         </div>
-
 
         <!-- Controls -->
         <div class="controls">
-
-            <button
-                id="startButton"
-                class="start-button">
-
+            <button id="startButton" class="start-button">
                 ▶ START
-
             </button>
-
+            <button id="stopButton" class="stop-button" disabled>
+                ⏹ STOP
+            </button>
         </div>
-
     </section>
-
 
     <!-- Detection Section -->
     <section class="detection-section">
-
-        <h2>
-            Detection Status
-        </h2>
-
+        <h2>Detection Status</h2>
 
         <!-- Status Card -->
-        <div
-            id="detectionCard"
-            class="detection-card normal">
-
-            <div
-                id="statusIcon"
-                class="status-icon">
-
+        <div id="detectionCard" class="detection-card normal">
+            <div id="statusIcon" class="status-icon">
                 ✓
-
             </div>
-
-
             <div class="detection-info">
-
-                <h3 id="detectionStatus">
-                    No Animal Detected
-                </h3>
-
-                <p id="detectionMessage">
-                    The monitoring system is ready.
-                </p>
-
+                <h3 id="detectionStatus">No Animal Detected</h3>
+                <p id="detectionMessage">The monitoring system is ready.</p>
             </div>
-
         </div>
-
 
         <!-- Animal Information -->
-        <div
-            id="animalDetails"
-            class="animal-details hidden">
-
+        <div id="animalDetails" class="animal-details hidden">
             <div class="detail-item">
-
-                <span>
-                    Animal
-                </span>
-
-                <strong id="animalName">
-                    —
-                </strong>
-
+                <span>Animal</span>
+                <strong id="animalName">—</strong>
             </div>
-
-
             <div class="detail-item">
-
-                <span>
-                    Confidence
-                </span>
-
-                <strong id="confidence">
-                    —
-                </strong>
-
+                <span>Confidence</span>
+                <strong id="confidence">—</strong>
             </div>
-
-
             <div class="detail-item">
-
-                <span>
-                    Severity
-                </span>
-
-                <strong id="severity">
-                    —
-                </strong>
-
+                <span>Severity</span>
+                <strong id="severity">—</strong>
             </div>
-
         </div>
 
-
         <!-- Alert -->
-        <div
-            id="alertBox"
-            class="alert-box hidden">
-
+        <div id="alertBox" class="alert-box hidden">
             <div class="alert-icon">
                 ⚠
             </div>
-
             <div>
-
-                <strong id="alertTitle">
-                    Alert
-                </strong>
-
-                <p id="alertMessage">
-                    —
-                </p>
-
+                <strong id="alertTitle">Alert</strong>
+                <p id="alertMessage">—</p>
             </div>
-
         </div>
-
     </section>
 
 </main>
 
-
 <!-- Footer -->
 <footer>
-
-    <p>
-        Crop Suraksha Kavach © 2026
-    </p>
-
-    <p>
-        AI-powered animal detection and alert system
-    </p>
-
+    <p>Crop Suraksha Kavach © 2026</p>
+    <p>AI-powered animal detection and alert system</p>
 </footer>
 
-
 <script src="script.js"></script>
-```
-
 </body>
-
 </html>

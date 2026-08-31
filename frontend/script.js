@@ -1,6 +1,7 @@
 const camera = document.getElementById("camera");
 const canvas = document.getElementById("detectionCanvas");
 const startButton = document.getElementById("startButton");
+const stopButton = document.getElementById("stopButton");
 
 const cameraPlaceholder = document.getElementById("cameraPlaceholder");
 const connectionStatus = document.getElementById("connectionStatus");
@@ -20,324 +21,261 @@ let stream = null;
 let detectionInterval = null;
 
 startButton.addEventListener("click", async () => {
-if (stream) {
-return;
+    if (stream) {
+        return;
+    }
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                width: 1280,
+                height: 720
+            },
+            audio: false
+        });
+
+        camera.srcObject = stream;
+        camera.style.display = "block";
+        cameraPlaceholder.style.display = "none";
+
+        startButton.disabled = true;
+        if (stopButton) {
+            stopButton.disabled = false;
+        }
+
+        connectionStatus.textContent = "● Monitoring";
+        connectionStatus.classList.remove("offline");
+        connectionStatus.classList.add("online");
+
+        resetDetection();
+
+        detectionInterval = setInterval(() => {
+            sendFrameToBackend();
+        }, 1000);
+
+    } catch (error) {
+        console.error("Camera error:", error);
+        alert("Unable to access the camera. Please allow camera permission.");
+    }
+});
+
+if (stopButton) {
+    stopButton.addEventListener("click", () => {
+        stopMonitoring();
+    });
 }
 
+function stopMonitoring() {
+    if (detectionInterval) {
+        clearInterval(detectionInterval);
+        detectionInterval = null;
+    }
 
-try {
-    stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-            width: 1280,
-            height: 720
-        },
-        audio: false
-    });
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
 
-    camera.srcObject = stream;
-    camera.style.display = "block";
-    cameraPlaceholder.style.display = "none";
+    camera.srcObject = null;
+    camera.style.display = "none";
+    cameraPlaceholder.style.display = "flex";
 
-    startButton.disabled = true;
+    startButton.disabled = false;
+    if (stopButton) {
+        stopButton.disabled = true;
+    }
 
-    connectionStatus.textContent = "● Monitoring";
-    connectionStatus.classList.remove("offline");
-    connectionStatus.classList.add("online");
+    connectionStatus.textContent = "● Offline";
+    connectionStatus.classList.remove("online");
+    connectionStatus.classList.add("offline");
 
     resetDetection();
+    clearCanvas();
+}
 
-    detectionInterval = setInterval(() => {
-        sendFrameToBackend();
-    }, 1000);
+async function sendFrameToBackend() {
+    if (
+        !stream ||
+        !camera.videoWidth ||
+        !camera.videoHeight
+    ) {
+        return;
+    }
 
-} catch (error) {
-    console.error("Camera error:", error);
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = camera.videoWidth;
+    tempCanvas.height = camera.videoHeight;
 
-    alert(
-        "Unable to access the camera. Please allow camera permission."
+    const context = tempCanvas.getContext("2d");
+    context.drawImage(
+        camera,
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height
+    );
+
+    tempCanvas.toBlob(
+        async (blob) => {
+            if (!blob) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append(
+                "image",
+                blob,
+                "camera_frame.jpg"
+            );
+
+            try {
+                const response = await fetch(
+                    "http://127.0.0.1:5000/detect",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Backend returned ${response.status}`
+                    );
+                }
+
+                const result = await response.json();
+                processDetectionResult(result);
+
+                connectionStatus.textContent = "● Monitoring";
+                connectionStatus.classList.remove("offline");
+                connectionStatus.classList.add("online");
+
+            } catch (error) {
+                console.log(
+                    "Backend connection error:",
+                    error.message
+                );
+
+                connectionStatus.textContent = "● Camera Active";
+                connectionStatus.classList.remove("offline");
+                connectionStatus.classList.add("online");
+            }
+        },
+        "image/jpeg",
+        0.8
     );
 }
 
-
-});
-
-async function sendFrameToBackend() {
-if (
-!stream ||
-!camera.videoWidth ||
-!camera.videoHeight
-) {
-return;
-}
-
-
-const tempCanvas = document.createElement("canvas");
-
-tempCanvas.width = camera.videoWidth;
-tempCanvas.height = camera.videoHeight;
-
-const context = tempCanvas.getContext("2d");
-
-context.drawImage(
-    camera,
-    0,
-    0,
-    tempCanvas.width,
-    tempCanvas.height
-);
-
-tempCanvas.toBlob(
-    async (blob) => {
-        if (!blob) {
-            return;
-        }
-
-        const formData = new FormData();
-
-        formData.append(
-            "image",
-            blob,
-            "camera_frame.jpg"
-        );
-
-        try {
-            const response = await fetch(
-                "http://127.0.0.1:5000/detect",
-                {
-                    method: "POST",
-                    body: formData
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Backend returned ${response.status}`
-                );
-            }
-
-            const result = await response.json();
-
-            processDetectionResult(result);
-
-            connectionStatus.textContent = "● Monitoring";
-
-            connectionStatus.classList.remove("offline");
-            connectionStatus.classList.add("online");
-
-        } catch (error) {
-            console.log(
-                "Backend connection error:",
-                error.message
-            );
-
-            connectionStatus.textContent = "● Camera Active";
-
-            connectionStatus.classList.remove("offline");
-            connectionStatus.classList.add("online");
-        }
-    },
-    "image/jpeg",
-    0.8
-);
-
-
-}
-
 function processDetectionResult(result) {
-if (
-!result ||
-!result.success ||
-!result.detections ||
-result.detections.length === 0
-) {
-resetDetection();
-clearCanvas();
-return;
-}
+    if (
+        !result ||
+        !result.success ||
+        !result.detections ||
+        result.detections.length === 0
+    ) {
+        resetDetection();
+        clearCanvas();
+        return;
+    }
 
+    const detections = result.detections;
+    const topDetection = detections[0];
 
-const detection = result.detections[0];
+    // Collect all unique animal names
+    const animalNames = [...new Set(detections.map(d => capitalize(d.animal)))].join(", ");
+    animalName.textContent = animalNames;
 
-const animal = detection.animal;
-const confidenceValue = detection.confidence;
+    // Show confidence of top detection
+    confidence.textContent = `${Math.round(topDetection.confidence * 100)}%`;
 
-animalName.textContent = capitalize(animal);
+    const alert =
+        result.alerts &&
+        result.alerts.length > 0
+            ? result.alerts[0]
+            : null;
 
-confidence.textContent =
-    `${Math.round(confidenceValue * 100)}%`;
+    if (alert) {
+        severity.textContent = alert.severity || "ALERT";
+        alertTitle.textContent = `${capitalize(alert.animal || topDetection.animal)} Detected`;
+        alertMessage.textContent = alert.message || "Animal detected!";
+        alertBox.classList.remove("hidden");
+    }
 
-const alert =
-    result.alerts &&
-    result.alerts.length > 0
-        ? result.alerts[0]
-        : null;
+    detectionStatus.textContent = detections.length > 1
+        ? `${detections.length} Animals Detected (${animalNames})`
+        : `${capitalize(topDetection.animal)} Detected`;
 
-if (alert) {
-    severity.textContent =
-        alert.severity || "ALERT";
+    detectionMessage.textContent = "Animal detected by the AI model.";
 
-    alertTitle.textContent =
-        `${capitalize(animal)} Detected`;
+    detectionCard.classList.remove("normal", "warning");
+    detectionCard.classList.add("danger");
 
-    alertMessage.textContent =
-        alert.message || "Animal detected!";
+    statusIcon.textContent = "⚠";
+    animalDetails.classList.remove("hidden");
 
-    alertBox.classList.remove("hidden");
-}
-
-detectionStatus.textContent =
-    `${capitalize(animal)} Detected`;
-
-detectionMessage.textContent =
-    "Animal detected by the AI model.";
-
-detectionCard.classList.remove(
-    "normal",
-    "warning"
-);
-
-detectionCard.classList.add("danger");
-
-statusIcon.textContent = "⚠";
-
-animalDetails.classList.remove("hidden");
-
-drawBoundingBox(
-    detection.bounding_box,
-    capitalize(animal),
-    confidenceValue
-);
-
-
+    drawBoundingBoxes(detections);
 }
 
 function resetDetection() {
-detectionCard.classList.remove(
-"danger",
-"warning"
-);
+    detectionCard.classList.remove("danger", "warning");
+    detectionCard.classList.add("normal");
 
+    statusIcon.textContent = "✓";
+    detectionStatus.textContent = "No Animal Detected";
+    detectionMessage.textContent = "The monitoring system is ready.";
 
-detectionCard.classList.add("normal");
+    animalDetails.classList.add("hidden");
+    alertBox.classList.add("hidden");
 
-statusIcon.textContent = "✓";
+    animalName.textContent = "—";
+    confidence.textContent = "—";
+    severity.textContent = "—";
 
-detectionStatus.textContent =
-    "No Animal Detected";
-
-detectionMessage.textContent =
-    "The monitoring system is ready.";
-
-animalDetails.classList.add("hidden");
-
-alertBox.classList.add("hidden");
-
-animalName.textContent = "—";
-
-confidence.textContent = "—";
-
-severity.textContent = "—";
-
-clearCanvas();
-
-
+    clearCanvas();
 }
 
-function drawBoundingBox(
-box,
-label,
-confidenceValue
-) {
-if (
-!box ||
-box.length !== 4
-) {
-return;
-}
+function drawBoundingBoxes(detections) {
+    if (!detections || detections.length === 0) {
+        clearCanvas();
+        return;
+    }
 
+    const ctx = canvas.getContext("2d");
+    canvas.width = camera.videoWidth;
+    canvas.height = camera.videoHeight;
 
-const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-canvas.width = camera.videoWidth;
-canvas.height = camera.videoHeight;
+    detections.forEach((det) => {
+        const box = det.bounding_box;
+        if (!box || box.length !== 4) return;
 
-ctx.clearRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-);
+        const [x1, y1, x2, y2] = box;
+        const label = `${capitalize(det.animal)} ${Math.round(det.confidence * 100)}%`;
 
-const [
-    x1,
-    y1,
-    x2,
-    y2
-] = box;
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#ff3333";
+        ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-ctx.lineWidth = 4;
+        ctx.font = "bold 18px Arial";
+        const textWidth = ctx.measureText(label).width;
 
-ctx.strokeStyle = "#ff3333";
+        ctx.fillStyle = "#ff3333";
+        ctx.fillRect(x1, Math.max(0, y1 - 30), textWidth + 16, 30);
 
-ctx.strokeRect(
-    x1,
-    y1,
-    x2 - x1,
-    y2 - y1
-);
-
-const text =
-    `${label} ${Math.round(
-        confidenceValue * 100
-    )}%`;
-
-ctx.font = "bold 18px Arial";
-
-const textWidth =
-    ctx.measureText(text).width;
-
-ctx.fillStyle = "#ff3333";
-
-ctx.fillRect(
-    x1,
-    Math.max(0, y1 - 30),
-    textWidth + 16,
-    30
-);
-
-ctx.fillStyle = "white";
-
-ctx.fillText(
-    text,
-    x1 + 8,
-    Math.max(21, y1 - 9)
-);
-
-
+        ctx.fillStyle = "white";
+        ctx.fillText(label, x1 + 8, Math.max(21, y1 - 9));
+    });
 }
 
 function clearCanvas() {
-const ctx = canvas.getContext("2d");
-
-ctx.clearRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-);
-
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function capitalize(text) {
-if (!text) {
-return "";
-}
-
-```
-return (
-    text.charAt(0).toUpperCase() +
-    text.slice(1)
-);
-```
-
+    if (!text) {
+        return "";
+    }
+    return text.charAt(0).toUpperCase() + text.slice(1);
 }

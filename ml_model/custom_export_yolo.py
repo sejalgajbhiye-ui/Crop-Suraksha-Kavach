@@ -13,16 +13,19 @@ dataset = foz.load_zoo_dataset(
 
 print(f"Loaded {len(dataset)} images")
 
-OUTPUT = "dataset"
+from pathlib import Path
 
-if os.path.exists(OUTPUT):
+BASE_DIR = Path(__file__).resolve().parent.parent
+OUTPUT = BASE_DIR / "dataset"
+
+if OUTPUT.exists():
     shutil.rmtree(OUTPUT)
 
 splits = ["train", "valid", "test"]
 
 for split in splits:
-    os.makedirs(f"{OUTPUT}/{split}/images", exist_ok=True)
-    os.makedirs(f"{OUTPUT}/{split}/labels", exist_ok=True)
+    (OUTPUT / split / "images").mkdir(parents=True, exist_ok=True)
+    (OUTPUT / split / "labels").mkdir(parents=True, exist_ok=True)
 
 print("Folders created!")
 
@@ -44,8 +47,6 @@ print(len(train_samples))
 print(len(valid_samples))
 print(len(test_samples))
 
-from pathlib import Path
-
 CLASS_MAP = {
     "Cattle": 0,
     "Deer": 1,
@@ -56,8 +57,9 @@ CLASS_NAMES = ["cow", "deer", "elephant"]
 
 
 def export_split(samples, split_name):
-    image_dir = Path(f"dataset/{split_name}/images")
-    label_dir = Path(f"dataset/{split_name}/labels")
+    image_dir = OUTPUT / split_name / "images"
+    label_dir = OUTPUT / split_name / "labels"
+
 
     exported = 0
 

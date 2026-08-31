@@ -1,5 +1,7 @@
-Flask
+flask
+flask-cors
 ultralytics
 opencv-python
+pillow
 torch
-torchvision
+torchvision
