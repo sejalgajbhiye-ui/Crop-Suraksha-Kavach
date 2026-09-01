@@ -1,10 +1,15 @@
 import os
+import numpy as np
+import torch
 from ultralytics import YOLO
 
 try:
     from backend.config import MODEL_PATH, FALLBACK_MODEL_PATH, CONFIDENCE_THRESHOLD, IMAGE_SIZE, MODEL_CLASSES
 except ImportError:
     from config import MODEL_PATH, FALLBACK_MODEL_PATH, CONFIDENCE_THRESHOLD, IMAGE_SIZE, MODEL_CLASSES
+
+# Optimize thread usage for cloud containers
+torch.set_num_threads(2)
 
 # Initialize YOLO model
 selected_model_path = MODEL_PATH if os.path.exists(MODEL_PATH) else FALLBACK_MODEL_PATH
@@ -13,7 +18,16 @@ if not os.path.exists(selected_model_path):
 
 model = YOLO(selected_model_path)
 
+# Warm up model on server startup to eliminate cold-start latency on first request
+try:
+    _dummy = np.zeros((320, 320, 3), dtype=np.uint8)
+    model.predict(source=_dummy, imgsz=320, device="cpu", verbose=False)
+    print("YOLO model initialized and warmed up successfully.")
+except Exception as _e:
+    print(f"Model warmup notice: {_e}")
 
+
+@torch.inference_mode()
 def detect_animal(image_path, conf_threshold=CONFIDENCE_THRESHOLD):
     """
     Run YOLO detection on the input image and return parsed animal detections.
@@ -57,4 +71,5 @@ def detect_animal(image_path, conf_threshold=CONFIDENCE_THRESHOLD):
                 ]
             })
 
-    return detections
+    return detections
+

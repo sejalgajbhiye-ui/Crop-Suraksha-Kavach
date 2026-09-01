@@ -85,9 +85,9 @@ def detect():
             "total_detected": len(detections)
         }
 
-        return jsonify(response), 200
-
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "message": str(e)
