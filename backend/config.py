@@ -15,7 +15,7 @@ UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "crop_suraksha_uploads")
 
 # Model Detection Settings
 CONFIDENCE_THRESHOLD = 0.25
-IMAGE_SIZE = 640
+IMAGE_SIZE = 320
 
 MODEL_CLASSES = {
     0: "cow",

@@ -159,14 +159,19 @@ function stopMonitoring() {
     clearCanvas();
 }
 
+let isProcessing = false;
+
 async function sendFrameToBackend() {
     if (
+        isProcessing ||
         !stream ||
         !camera.videoWidth ||
         !camera.videoHeight
     ) {
         return;
     }
+
+    isProcessing = true;
 
     const tempCanvas = document.createElement("canvas");
     tempCanvas.width = camera.videoWidth;
@@ -184,6 +189,7 @@ async function sendFrameToBackend() {
     tempCanvas.toBlob(
         async (blob) => {
             if (!blob) {
+                isProcessing = false;
                 return;
             }
 
@@ -225,10 +231,12 @@ async function sendFrameToBackend() {
                 connectionStatus.textContent = "● Camera Active";
                 connectionStatus.classList.remove("offline");
                 connectionStatus.classList.add("online");
+            } finally {
+                isProcessing = false;
             }
         },
         "image/jpeg",
-        0.8
+        0.7
     );
 }
 
