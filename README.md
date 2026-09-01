@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌾 Crop Suraksha Kavach (फसल सुरक्षा कवच)
+# 🌾 Crop Suraksha Kavach 
 ### *AI-Powered Agricultural Wildlife Detection & Smart Threat Defense System*
 
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
@@ -532,4 +532,4 @@ Special thanks to:
 - **Ultralytics** for the [YOLOv8 framework](https://github.com/ultralytics/ultralytics).
 - **Google Open Images v7** and **FiftyOne** for dataset tooling.
 - The open-source computer vision and agricultural IoT communities.
-
+
