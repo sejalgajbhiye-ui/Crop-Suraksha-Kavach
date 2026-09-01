@@ -33,7 +33,8 @@
 
         <!-- Camera -->
         <div class="camera-container">
-            <video id="camera" autoplay playsinline></video>
+            <video id="camera" autoplay playsinline muted></video>
+            <img id="uploadedImage" alt="Uploaded Preview" style="display: none; width: 100%; height: 100%; object-fit: contain;">
             <canvas id="detectionCanvas"></canvas>
 
             <!-- Camera Placeholder -->
@@ -41,19 +42,23 @@
                 <div class="camera-icon">
                     📷
                 </div>
-                <h3>Camera is not active</h3>
-                <p>Click START to begin live monitoring</p>
+                <h3>Camera or Image Inactive</h3>
+                <p>Click START to stream webcam or UPLOAD an image</p>
             </div>
         </div>
 
         <!-- Controls -->
         <div class="controls">
             <button id="startButton" class="start-button">
-                ▶ START
+                ▶ START CAMERA
             </button>
             <button id="stopButton" class="stop-button" disabled>
                 ⏹ STOP
             </button>
+            <label for="imageUpload" class="upload-button">
+                📁 UPLOAD IMAGE
+            </label>
+            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
         </div>
     </section>
 

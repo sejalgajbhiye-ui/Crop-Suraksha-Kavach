@@ -17,6 +17,9 @@ const alertBox = document.getElementById("alertBox");
 const alertTitle = document.getElementById("alertTitle");
 const alertMessage = document.getElementById("alertMessage");
 
+const imageUpload = document.getElementById("imageUpload");
+const uploadedImage = document.getElementById("uploadedImage");
+
 // Automatically use local backend if running locally, or Render if on cloud
 const BACKEND_URL = (
     window.location.hostname === "localhost" ||
@@ -30,10 +33,62 @@ const BACKEND_URL = (
 let stream = null;
 let detectionInterval = null;
 
+if (imageUpload) {
+    imageUpload.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Stop camera stream if active
+        stopMonitoring();
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            uploadedImage.src = event.target.result;
+            uploadedImage.style.display = "block";
+            camera.style.display = "none";
+            cameraPlaceholder.style.display = "none";
+
+            const img = new Image();
+            img.onload = async () => {
+                const formData = new FormData();
+                formData.append("image", file);
+
+                try {
+                    connectionStatus.textContent = "● Analyzing...";
+                    connectionStatus.classList.remove("offline");
+                    connectionStatus.classList.add("online");
+
+                    const response = await fetch(BACKEND_URL, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Backend returned ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    processDetectionResult(result, img.naturalWidth || img.width, img.naturalHeight || img.height);
+                    connectionStatus.textContent = "● Detection Complete";
+
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    alert("Detection error: " + err.message);
+                    connectionStatus.textContent = "● Error";
+                }
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 startButton.addEventListener("click", async () => {
     if (stream) {
         return;
     }
+
+    uploadedImage.style.display = "none";
 
     try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -65,7 +120,7 @@ startButton.addEventListener("click", async () => {
 
     } catch (error) {
         console.error("Camera error:", error);
-        alert("Unable to access the camera. Please allow camera permission.");
+        alert("Unable to access the camera. Please allow camera permission or use the UPLOAD IMAGE button.");
     }
 });
 
@@ -88,6 +143,7 @@ function stopMonitoring() {
 
     camera.srcObject = null;
     camera.style.display = "none";
+    uploadedImage.style.display = "none";
     cameraPlaceholder.style.display = "flex";
 
     startButton.disabled = false;
@@ -154,7 +210,7 @@ async function sendFrameToBackend() {
                 }
 
                 const result = await response.json();
-                processDetectionResult(result);
+                processDetectionResult(result, camera.videoWidth, camera.videoHeight);
 
                 connectionStatus.textContent = "● Monitoring";
                 connectionStatus.classList.remove("offline");
@@ -176,7 +232,7 @@ async function sendFrameToBackend() {
     );
 }
 
-function processDetectionResult(result) {
+function processDetectionResult(result, frameWidth, frameHeight) {
     if (
         !result ||
         !result.success ||
@@ -223,7 +279,7 @@ function processDetectionResult(result) {
     statusIcon.textContent = "⚠";
     animalDetails.classList.remove("hidden");
 
-    drawBoundingBoxes(detections);
+    drawBoundingBoxes(detections, frameWidth, frameHeight);
 }
 
 function resetDetection() {
@@ -244,16 +300,19 @@ function resetDetection() {
     clearCanvas();
 }
 
-function drawBoundingBoxes(detections) {
+function drawBoundingBoxes(detections, frameWidth, frameHeight) {
     if (!detections || detections.length === 0) {
         clearCanvas();
         return;
     }
 
-    const ctx = canvas.getContext("2d");
-    canvas.width = camera.videoWidth;
-    canvas.height = camera.videoHeight;
+    const w = frameWidth || camera.videoWidth || 640;
+    const h = frameHeight || camera.videoHeight || 480;
 
+    canvas.width = w;
+    canvas.height = h;
+
+    const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     detections.forEach((det) => {
@@ -267,14 +326,14 @@ function drawBoundingBoxes(detections) {
         ctx.strokeStyle = "#ff3333";
         ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-        ctx.font = "bold 18px Arial";
+        ctx.font = "bold 20px Arial";
         const textWidth = ctx.measureText(label).width;
 
         ctx.fillStyle = "#ff3333";
-        ctx.fillRect(x1, Math.max(0, y1 - 30), textWidth + 16, 30);
+        ctx.fillRect(x1, Math.max(0, y1 - 32), textWidth + 16, 32);
 
         ctx.fillStyle = "white";
-        ctx.fillText(label, x1 + 8, Math.max(21, y1 - 9));
+        ctx.fillText(label, x1 + 8, Math.max(22, y1 - 9));
     });
 }
 

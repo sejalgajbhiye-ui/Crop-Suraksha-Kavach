@@ -1,18 +1,19 @@
 import os
 import uuid
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 try:
-    from backend.config import SERVER_HOST, SERVER_PORT, UPLOAD_DIR, CONFIDENCE_THRESHOLD, MODEL_CLASSES
+    from backend.config import BASE_DIR, SERVER_HOST, SERVER_PORT, UPLOAD_DIR, CONFIDENCE_THRESHOLD, MODEL_CLASSES
     from backend.detector import detect_animal, model
     from backend.alert import generate_alert
 except ImportError:
-    from config import SERVER_HOST, SERVER_PORT, UPLOAD_DIR, CONFIDENCE_THRESHOLD, MODEL_CLASSES
+    from config import BASE_DIR, SERVER_HOST, SERVER_PORT, UPLOAD_DIR, CONFIDENCE_THRESHOLD, MODEL_CLASSES
     from detector import detect_animal, model
     from alert import generate_alert
 
-app = Flask(__name__)
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 CORS(app)
 
 # Ensure upload directory exists
@@ -21,17 +22,26 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.route("/", methods=["GET"])
 def home():
+    if request.accept_mimetypes.accept_html and os.path.exists(os.path.join(FRONTEND_DIR, "index.html")):
+        return send_from_directory(FRONTEND_DIR, "index.html")
     return jsonify({
         "name": "Crop Suraksha Kavach API",
         "status": "online",
         "version": "1.0.0",
         "endpoints": {
-            "/": "Project and model information (GET)",
+            "/": "Web Dashboard or API Information (GET)",
             "/health": "Backend health status (GET)",
             "/detect": "Animal detection API (POST)"
         },
         "supported_classes": list(MODEL_CLASSES.values()) if isinstance(MODEL_CLASSES, dict) else MODEL_CLASSES
     })
+
+
+@app.route("/<path:filename>", methods=["GET"])
+def serve_static(filename):
+    if os.path.exists(os.path.join(FRONTEND_DIR, filename)):
+        return send_from_directory(FRONTEND_DIR, filename)
+    return jsonify({"error": "File not found"}), 404
 
 
 @app.route("/health", methods=["GET"])
