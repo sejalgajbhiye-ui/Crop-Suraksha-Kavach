@@ -61,24 +61,19 @@ def detect():
             "message": "No image provided in request."
         }), 400
 
-    image = request.files["image"]
-
-    if not image or image.filename == "":
+    file = request.files["image"]
+    if not file or file.filename == "":
         return jsonify({
             "success": False,
             "message": "No image selected for processing."
         }), 400
 
-    # Generate a unique filename to avoid collision
-    extension = os.path.splitext(image.filename)[1] or ".jpg"
-    unique_filename = f"{uuid.uuid4().hex}{extension}"
-    image_path = os.path.join(UPLOAD_DIR, unique_filename)
-
     try:
-        image.save(image_path)
+        from PIL import Image
+        pil_img = Image.open(file.stream).convert("RGB")
 
-        # Run YOLO detection
-        detections = detect_animal(image_path)
+        # Run YOLO detection in-memory
+        detections = detect_animal(pil_img)
 
         # Generate alerts
         alerts = []
@@ -104,14 +99,6 @@ def detect():
             "success": False,
             "message": str(e)
         }), 500
-
-    finally:
-        # Delete temporary uploaded image after processing
-        if os.path.exists(image_path):
-            try:
-                os.remove(image_path)
-            except OSError:
-                pass
 
 
 if __name__ == "__main__":

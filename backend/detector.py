@@ -28,12 +28,12 @@ except Exception as _e:
 
 
 @torch.inference_mode()
-def detect_animal(image_path, conf_threshold=CONFIDENCE_THRESHOLD):
+def detect_animal(image_input, conf_threshold=CONFIDENCE_THRESHOLD):
     """
-    Run YOLO detection on the input image and return parsed animal detections.
+    Run YOLO detection on an in-memory PIL image or file path.
     """
     results = model.predict(
-        source=image_path,
+        source=image_input,
         imgsz=IMAGE_SIZE,
         conf=conf_threshold,
         device="cpu",
