@@ -9,7 +9,8 @@ except ImportError:
     from config import MODEL_PATH, FALLBACK_MODEL_PATH, CONFIDENCE_THRESHOLD, IMAGE_SIZE, MODEL_CLASSES
 
 # Optimize thread usage for cloud containers
-torch.set_num_threads(2)
+torch.set_num_threads(1)
+torch.set_grad_enabled(False)
 
 # Initialize YOLO model
 selected_model_path = MODEL_PATH if os.path.exists(MODEL_PATH) else FALLBACK_MODEL_PATH

@@ -43,3 +43,5 @@ backend/results/
 # =========================
 .DS_Store
 Thumbs.db
+Ultralytics/
+runs/

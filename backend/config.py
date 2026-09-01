@@ -1,6 +1,12 @@
 import os
 import tempfile
 
+# Prevent Ultralytics from writing to read-only directories on cloud containers
+os.environ["YOLO_CONFIG_DIR"] = tempfile.gettempdir()
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["TORCH_NUM_THREADS"] = "1"
+
 # Server Configuration
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 5000
