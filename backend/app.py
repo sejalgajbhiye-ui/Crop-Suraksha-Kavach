@@ -14,14 +14,24 @@ except ImportError:
 
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-@app.route("/", methods=["GET"])
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    return response
+
+
+@app.route("/", methods=["GET", "OPTIONS"])
 def home():
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
     if request.accept_mimetypes.accept_html and os.path.exists(os.path.join(FRONTEND_DIR, "index.html")):
         return send_from_directory(FRONTEND_DIR, "index.html")
     return jsonify({
@@ -44,16 +54,20 @@ def serve_static(filename):
     return jsonify({"error": "File not found"}), 404
 
 
-@app.route("/health", methods=["GET"])
+@app.route("/health", methods=["GET", "OPTIONS"])
 def health():
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
     return jsonify({
         "status": "healthy",
         "model_loaded": model is not None
     })
 
 
-@app.route("/detect", methods=["POST"])
+@app.route("/detect", methods=["POST", "OPTIONS"])
 def detect():
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
     # Check whether image was uploaded via multipart/form-data
     if "image" not in request.files:
         return jsonify({
