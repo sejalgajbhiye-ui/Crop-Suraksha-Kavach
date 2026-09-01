@@ -14,7 +14,7 @@ FALLBACK_MODEL_PATH = os.path.join(BASE_DIR, "yolov8n.pt")
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "crop_suraksha_uploads")
 
 # Model Detection Settings
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.25
 IMAGE_SIZE = 640
 
 MODEL_CLASSES = {

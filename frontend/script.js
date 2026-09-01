@@ -17,6 +17,16 @@ const alertBox = document.getElementById("alertBox");
 const alertTitle = document.getElementById("alertTitle");
 const alertMessage = document.getElementById("alertMessage");
 
+// Automatically use local backend if running locally, or Render if on cloud
+const BACKEND_URL = (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.protocol === "file:" ||
+    !window.location.hostname
+)
+    ? "http://127.0.0.1:5000/detect"
+    : "https://crop-suraksha-backend.onrender.com/detect";
+
 let stream = null;
 let detectionInterval = null;
 
@@ -130,7 +140,7 @@ async function sendFrameToBackend() {
 
             try {
                 const response = await fetch(
-                    "https://crop-suraksha-backend.onrender.com/detect",
+                    BACKEND_URL,
                     {
                         method: "POST",
                         body: formData
