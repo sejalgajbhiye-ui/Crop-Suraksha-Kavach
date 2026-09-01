@@ -1,7 +1,8 @@
 flask
 flask-cors
+gunicorn
 ultralytics
-opencv-python
+opencv-python-headless
 pillow
 torch
 torchvision
