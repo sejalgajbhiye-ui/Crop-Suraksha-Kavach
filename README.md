@@ -220,20 +220,9 @@ yolo detect val model="ml_model/weights/best.pt" data=dataset/data.yaml split=te
 |---|---|---|
 | 🎯 **Precision** | **0.845 (84.5%)** | Ratio of true positive animal detections |
 | 🔍 **Recall** | **0.671 (67.1%)** | Ratio of actual animals successfully localized |
-| 📈 **mAP@50** | **0.776 (77.6%)** | Mean Average Precision at IoU threshold of 0.50 |
-| 📊 **mAP@50-95** | **0.526 (52.6%)** | Mean Average Precision across IoU thresholds 0.50 to 0.95 |
 
 </div>
 
-#### Class-Wise Performance Breakdown (mAP@50)
-
-```text
-Elephant  ████████████████████████████████████ 85.3%
-Deer      ███████████████████████████████▍     78.7%
-Cow       ███████████████████████████▌         68.9%
-```
-
----
 
 ### Direct Inference & Sample Image Testing
 
